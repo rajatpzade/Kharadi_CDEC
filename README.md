@@ -2451,4 +2451,156 @@ student@linux:~$ type python
 8. **Customization:** Edit `~/.bashrc` to customize your prompt and environment
 
 ---
-// ...existing code...
+# Day-5
+
+---
+
+## Delving Deep into the Linux File System
+
+### Overview
+The Linux filesystem is hierarchical, rooted at /. Learn paths, navigation, and basic file operations to manage files and directories safely.
+
+---
+
+## Navigating the File System
+
+- Root and common directories:
+  - /        ← root
+  - /home    ← user home directories
+  - /etc     ← configuration files
+  - /var     ← variable data (logs, databases)
+  - /usr     ← user programs and libraries
+  - /tmp     ← temporary files
+
+- Key navigation commands:
+  - pwd               ← print working directory
+    - Example: pwd
+  - ls                ← list files
+    - Example: ls -la /etc
+  - cd DIR            ← change directory
+    - Examples:
+      - cd ~         ← go to home
+      - cd /var/log  ← go to /var/log
+      - cd -         ← switch to previous directory
+  - tree (optional)   ← show tree view (install via package manager)
+    - Example: tree -L 2 /home
+
+---
+
+## File and Directory Management
+
+- Create directory:
+  - mkdir DIR
+    - Example: mkdir -p ~/projects/myapp   # -p creates parents
+- Remove directory:
+  - rmdir DIR                # removes empty dir
+  - rm -r DIR                # remove dir recursively (use with care)
+    - Example: rm -r ~/old_project
+- List with details:
+  - ls -l, ls -lh, ls -la
+    - Example: ls -lh ~/projects
+- Permissions and ownership:
+  - chmod MODE FILE          # change permissions
+    - Example: chmod 644 file.txt
+    - Example (executable): chmod +x script.sh
+  - chown USER:GROUP FILE    # change owner and group (requires sudo for others)
+    - Example: sudo chown rajat:staff /var/www/html -R
+- Create empty file:
+  - touch filename
+    - Example: touch ~/notes/todo.txt
+
+---
+
+## Viewing and Editing Files
+
+- View file content:
+  - cat FILE                ← print whole file
+    - Example: cat /etc/hosts
+  - less FILE               ← paged viewer (scrollable)
+    - Example: less /var/log/syslog
+  - head/tail               ← show top/bottom lines
+    - Example: head -n 20 file.log
+    - Example: tail -f /var/log/syslog   # follow updates
+- Search inside files:
+  - grep 'pattern' FILE
+    - Example: grep -i error /var/log/syslog
+  - grep -R 'TODO' ~/projects   # recursive search
+- Edit files:
+  - nano FILE (easy)         ← nano ~/notes/todo.txt
+  - vim FILE (advanced)      ← vim ~/scripts/deploy.sh
+  - use sudo for protected files:
+    - sudo nano /etc/hosts
+    - sudo vim /etc/nginx/nginx.conf
+- Safe editing pattern (for config files):
+  1. sudo cp /etc/config /etc/config.bak
+  2. sudo nano /etc/config
+  3. sudo systemctl reload service
+
+---
+
+## Copy, Move, and Delete Files
+
+- Copy files/directories:
+  - cp SRC DEST
+    - Example (file): cp ~/notes/todo.txt ~/backup/
+    - Example (dir): cp -r ~/projects/myapp ~/backup/myapp
+  - Preserve attributes:
+    - cp -a /src /dest
+- Move / rename:
+  - mv SRC DEST
+    - Example (move): mv ~/downloads/report.pdf ~/documents/
+    - Example (rename): mv oldname.txt newname.txt
+- Delete files:
+  - rm FILE
+    - Example: rm ~/temp/tmp.txt
+  - Delete multiple:
+    - rm file1 file2
+  - Recursive delete (dangerous):
+    - rm -rf /path/to/dir    # irreversible — double-check path
+- Secure delete (optional):
+  - shred -u FILE           # overwrite then remove (not guaranteed on SSDs)
+
+---
+
+## Useful Patterns & Tips
+
+- Always list before destructive actions:
+  - ls -la /path/to/dir
+- Dry-run using echo:
+  - echo rm -rf /path/to/dir   # shows command instead of running
+- Use tab-completion and history to avoid typos:
+  - Tab key, and ↑ to reuse commands
+- Use sudo only when required; prefer changing ownership for files you manage:
+  - sudo chown $USER:$USER /some/dir -R
+- Keep backups for config files:
+  - cp file.conf file.conf.bak
+
+---
+
+## Hands-on Exercises
+
+1. Navigate and list:
+   - cd ~; pwd; ls -la
+2. Create project structure:
+   - mkdir -p ~/projects/demo/{src,docs,tests}
+3. Create and edit file:
+   - touch ~/projects/demo/README.md; nano ~/projects/demo/README.md
+4. Find and copy files:
+   - grep -R "TODO" ~/projects || true
+   - cp -r ~/projects/demo ~/projects/demo-backup
+5. Practice safe delete:
+   - ls ~/projects; echo rm -rf ~/projects/demo-backup
+   - When confident: rm -rf ~/projects/demo-backup
+
+---
+
+## Quick Command Cheat-sheet
+
+- Navigation: pwd, cd, ls, tree
+- Create/Remove: mkdir, rmdir, rm -r
+- File ops: cp, mv, rm, touch
+- View/Edit: cat, less, head, tail, grep, nano, vim
+- Permissions: chmod, chown
+- Safety: cp backup, echo dry-run, avoid sudo when possible
+
+---
