@@ -1096,7 +1096,6 @@ Diagram (simple)
 - Linux is open-source, widely used on servers and in cloud environments.
 - Understanding kernel, system calls, filesystem, and user space is key to Linux mastery.
 
-// ...existing code...
 
 # Day-4
 
@@ -2450,157 +2449,491 @@ student@linux:~$ type python
 
 8. **Customization:** Edit `~/.bashrc` to customize your prompt and environment
 
----
 # Day-5
 
----
 
-## Delving Deep into the Linux File System
+## Delving Deep into the Linux File System — Practical Notes for Students
 
-### Overview
-The Linux filesystem is hierarchical, rooted at /. Learn paths, navigation, and basic file operations to manage files and directories safely.
+This chapter teaches everyday file-system operations you will use frequently: how to move around, create and manage files/directories, view and edit file contents, and safely copy/move/delete files. Each section contains commands and simple examples you can try in the terminal.
 
 ---
 
-## Navigating the File System
+## 1. Navigating the File System
 
-- Root and common directories:
-  - /        ← root
-  - /home    ← user home directories
-  - /etc     ← configuration files
-  - /var     ← variable data (logs, databases)
-  - /usr     ← user programs and libraries
-  - /tmp     ← temporary files
+Purpose: find where you are, list contents, and move between folders.
 
-- Key navigation commands:
-  - pwd               ← print working directory
-    - Example: pwd
-  - ls                ← list files
-    - Example: ls -la /etc
-  - cd DIR            ← change directory
-    - Examples:
-      - cd ~         ← go to home
-      - cd /var/log  ← go to /var/log
-      - cd -         ← switch to previous directory
-  - tree (optional)   ← show tree view (install via package manager)
-    - Example: tree -L 2 /home
+Basic commands
+- Print current directory:
+  ```bash
+  pwd
+  # Example output: /home/rajat
+  ```
+- List files and directories:
+  ```bash
+  ls
+  ls -l        # long listing: permissions, owner, size, date
+  ls -la       # include hidden files (those starting with .)
+  ls -lh       # human-readable sizes (K, M, G)
+  ```
+- Change directory:
+  ```bash
+  cd /path/to/dir
+  cd ~         # go to your home directory
+  cd -         # go to previous directory
+  cd ..        # go up one level (parent)
+  ```
+- Show tree view (install if needed: apt install tree):
+  ```bash
+  tree -L 2 ~/projects
+  ```
+- Quick navigation helpers:
+  - `Tab` for auto-completion of filenames and directories.
+  - `pushd /path` and `popd` to use a directory stack (helpful when switching contexts).
+  - `cd -` returns to the last directory.
+
+Example session:
+```bash
+pwd                  # /home/rajat
+ls -la               # show files, including .bashrc
+cd Documents
+pwd                  # /home/rajat/Documents
+cd ~/projects/myapp
+```
 
 ---
 
-## File and Directory Management
+## 2. File and Directory Management
+
+Create, inspect, rename, change ownership, and set permissions.
 
 - Create directory:
-  - mkdir DIR
-    - Example: mkdir -p ~/projects/myapp   # -p creates parents
+  ```bash
+  mkdir mydir
+  mkdir -p parent/child/grandchild   # -p creates parents as needed
+  ```
 - Remove directory:
-  - rmdir DIR                # removes empty dir
-  - rm -r DIR                # remove dir recursively (use with care)
-    - Example: rm -r ~/old_project
-- List with details:
-  - ls -l, ls -lh, ls -la
-    - Example: ls -lh ~/projects
-- Permissions and ownership:
-  - chmod MODE FILE          # change permissions
-    - Example: chmod 644 file.txt
-    - Example (executable): chmod +x script.sh
-  - chown USER:GROUP FILE    # change owner and group (requires sudo for others)
-    - Example: sudo chown rajat:staff /var/www/html -R
-- Create empty file:
-  - touch filename
-    - Example: touch ~/notes/todo.txt
+  ```bash
+  rmdir emptydir       # only removes if directory is empty
+  rm -r dir_to_remove  # recursive delete (use with care)
+  ```
+- Create an empty file (or update timestamp):
+  ```bash
+  touch notes.txt
+  ```
+- Rename or move files/directories:
+  ```bash
+  mv oldname.txt newname.txt
+  mv ~/downloads/report.pdf ~/documents/  # move file to folder
+  ```
+- Copy files and directories:
+  ```bash
+  cp file.txt /path/to/destination/
+  cp -r myproject/ ~/backup/myproject/    # copy directory recursively
+  ```
+- Inspect file or directory metadata:
+  ```bash
+  stat file.txt
+  ls -l file.txt
+  ```
+- Change permissions:
+  ```bash
+  chmod 644 file.txt      # rw-r--r--
+  chmod +x script.sh      # make executable
+  ```
+- Change owner and group (requires sudo for other users):
+  ```bash
+  sudo chown rajat:staff /var/www/html -R
+  ```
+
+Safety tip: always `ls` the path before `rm -r`. Use `echo` to preview destructive commands:
+```bash
+echo rm -rf /some/path
+```
 
 ---
 
-## Viewing and Editing Files
+## 3. Viewing and Editing Files
 
-- View file content:
-  - cat FILE                ← print whole file
-    - Example: cat /etc/hosts
-  - less FILE               ← paged viewer (scrollable)
-    - Example: less /var/log/syslog
-  - head/tail               ← show top/bottom lines
-    - Example: head -n 20 file.log
-    - Example: tail -f /var/log/syslog   # follow updates
+Quickly read files, follow logs, search inside files, and edit content.
+
+- View entire file:
+  ```bash
+  cat file.txt
+  ```
+- Page through long files:
+  ```bash
+  less /var/log/syslog    # use Space to page, / to search, q to quit
+  ```
+- Show start or end of file:
+  ```bash
+  head -n 20 file.txt     # first 20 lines
+  tail -n 20 file.txt     # last 20 lines
+  tail -f /var/log/syslog # follow new lines in real time
+  ```
 - Search inside files:
-  - grep 'pattern' FILE
-    - Example: grep -i error /var/log/syslog
-  - grep -R 'TODO' ~/projects   # recursive search
-- Edit files:
-  - nano FILE (easy)         ← nano ~/notes/todo.txt
-  - vim FILE (advanced)      ← vim ~/scripts/deploy.sh
-  - use sudo for protected files:
-    - sudo nano /etc/hosts
-    - sudo vim /etc/nginx/nginx.conf
-- Safe editing pattern (for config files):
-  1. sudo cp /etc/config /etc/config.bak
-  2. sudo nano /etc/config
-  3. sudo systemctl reload service
+  ```bash
+  grep 'ERROR' app.log
+  grep -Ri 'TODO' ~/projects
+  ```
+- Simple edits (text editors):
+  - nano (beginner friendly)
+    ```bash
+    nano ~/projects/notes.md
+    ```
+  - vim (power user — steeper learning curve)
+    ```bash
+    vim ~/scripts/deploy.sh
+    ```
+- Quick text transformations:
+  ```bash
+  sed -n '1,50p' file.txt         # show lines 1-50
+  awk '{print $1, $3}' data.csv   # print columns 1 and 3
+  ```
+
+Example: inspect and follow a web server log
+```bash
+sudo less /var/log/nginx/error.log
+# or follow in real time
+sudo tail -f /var/log/nginx/error.log
+```
+
+Always back up configuration files before editing:
+```bash
+sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+sudo nano /etc/nginx/nginx.conf
+# after changes:
+sudo systemctl reload nginx
+```
 
 ---
 
-## Copy, Move, and Delete Files
+## 4. Copy, Move, and Delete Files — Practical Patterns
 
-- Copy files/directories:
-  - cp SRC DEST
-    - Example (file): cp ~/notes/todo.txt ~/backup/
-    - Example (dir): cp -r ~/projects/myapp ~/backup/myapp
-  - Preserve attributes:
-    - cp -a /src /dest
-- Move / rename:
-  - mv SRC DEST
-    - Example (move): mv ~/downloads/report.pdf ~/documents/
-    - Example (rename): mv oldname.txt newname.txt
-- Delete files:
-  - rm FILE
-    - Example: rm ~/temp/tmp.txt
-  - Delete multiple:
-    - rm file1 file2
-  - Recursive delete (dangerous):
-    - rm -rf /path/to/dir    # irreversible — double-check path
-- Secure delete (optional):
-  - shred -u FILE           # overwrite then remove (not guaranteed on SSDs)
+Common operations and safer alternatives.
+
+Copying
+- Basic copy:
+  ```bash
+  cp source.txt destination.txt
+  ```
+- Preserve attributes (mode, timestamps, links):
+  ```bash
+  cp -a /source/dir /dest/dir
+  ```
+- Use rsync for large or repeated copies (recommended):
+  ```bash
+  rsync -avh --progress ~/projects/myapp/ ~/backup/myapp/
+  ```
+
+Moving / Renaming
+- Move or rename:
+  ```bash
+  mv file.txt /other/place/
+  mv oldname.txt newname.txt
+  ```
+- Move directory:
+  ```bash
+  mv ~/downloads/myfolder ~/projects/
+  ```
+
+Deleting (be careful!)
+- Remove a single file:
+  ```bash
+  rm filename.txt
+  ```
+- Remove multiple files:
+  ```bash
+  rm file1 file2 file3
+  ```
+- Recursive and force remove (dangerous):
+  ```bash
+  rm -rf /path/to/dir
+  ```
+  - Double-check path; avoid running as root unless necessary.
+
+Safer delete workflow
+1. List files to confirm:
+   ```bash
+   ls -la /path/to/dir
+   ```
+2. Use `trash` / `gio trash` (desktop environments) or move to a temporary folder:
+   ```bash
+   mkdir -p ~/trash; mv ~/projects/oldproj ~/trash/
+   ```
+3. When certain, remove permanently.
+
+Example: backup, then remove
+```bash
+cp -r ~/projects/demo ~/backup/demo-$(date +%F)
+rm -rf ~/projects/demo
+```
+
+---
+
+## 5. Quick Exercises (Try in your terminal)
+
+1. Navigate and inspect:
+   ```bash
+   pwd
+   ls -la
+   cd /tmp
+   mkdir -p ~/lab/demo
+   ```
+2. Create, edit, and view:
+   ```bash
+   touch ~/lab/demo/notes.txt
+   echo "First note" > ~/lab/demo/notes.txt
+   cat ~/lab/demo/notes.txt
+   nano ~/lab/demo/notes.txt   # add another line, save
+   ```
+3. Copy and verify:
+   ```bash
+   cp -a ~/lab/demo ~/lab/demo-backup
+   ls -la ~/lab
+   ```
+4. Safe remove:
+   ```bash
+   mv ~/lab/demo ~/lab/demo-to-delete
+   ls -la ~/lab
+   # after confirming contents:
+   rm -r ~/lab/demo-to-delete
+   ```
 
 ---
 
-## Useful Patterns & Tips
+## 6. Quick Reference Cheat-sheet
 
-- Always list before destructive actions:
-  - ls -la /path/to/dir
-- Dry-run using echo:
-  - echo rm -rf /path/to/dir   # shows command instead of running
-- Use tab-completion and history to avoid typos:
-  - Tab key, and ↑ to reuse commands
-- Use sudo only when required; prefer changing ownership for files you manage:
-  - sudo chown $USER:$USER /some/dir -R
-- Keep backups for config files:
-  - cp file.conf file.conf.bak
+Navigation:
+- pwd, ls, ls -la, cd, cd -, tree
 
----
+Create / Remove:
+- mkdir -p, rmdir, rm -r (use safely), touch
 
-## Hands-on Exercises
+Inspect:
+- stat, ls -l, file, du -sh, df -h
 
-1. Navigate and list:
-   - cd ~; pwd; ls -la
-2. Create project structure:
-   - mkdir -p ~/projects/demo/{src,docs,tests}
-3. Create and edit file:
-   - touch ~/projects/demo/README.md; nano ~/projects/demo/README.md
-4. Find and copy files:
-   - grep -R "TODO" ~/projects || true
-   - cp -r ~/projects/demo ~/projects/demo-backup
-5. Practice safe delete:
-   - ls ~/projects; echo rm -rf ~/projects/demo-backup
-   - When confident: rm -rf ~/projects/demo-backup
+View & Search:
+- cat, less, head, tail, tail -f, grep -R
+
+Edit:
+- nano, vim, sed, awk
+
+Copy / Move:
+- cp, cp -r, cp -a, rsync -avh, mv
+
+Permissions & Ownership:
+- chmod, chown, chgrp
+
+Safety:
+- Always verify with ls before rm
+- Backup config files before editing
+- Prefer rsync for large or incremental copies
 
 ---
 
-## Quick Command Cheat-sheet
+# Day-6
 
-- Navigation: pwd, cd, ls, tree
-- Create/Remove: mkdir, rmdir, rm -r
-- File ops: cp, mv, rm, touch
-- View/Edit: cat, less, head, tail, grep, nano, vim
-- Permissions: chmod, chown
-- Safety: cp backup, echo dry-run, avoid sudo when possible
+
+
+## Mastering the Linux File System Hierarchy
+
+### Mastering the Linux File System — 19 important directories
+
+- / (root)
+  - The top of the filesystem tree. All paths start here.
+  - Example: ls -ld /
+
+- /bin
+  - Essential user binaries (commands) required for single-user mode and for all users (ls, cp, mv).
+  - Example: ls -l /bin/ls
+
+- /boot
+  - Files required to boot the system: kernel, initramfs, bootloader config.
+  - Example: ls -l /boot
+
+- /dev
+  - Device files representing hardware and virtual devices (e.g., /dev/sda).
+  - Example: ls -l /dev/sda*
+
+- /etc
+  - System-wide configuration files and startup scripts.
+  - Example: ls -la /etc | head
+
+- /home
+  - Users' personal directories (e.g., /home/rajat).
+  - Example: ls -la /home
+
+- /lib
+  - Shared libraries required by binaries in /bin and /sbin (32-bit systems).
+  - Example: ls -l /lib | head
+
+- /lib64
+  - 64-bit shared libraries on 64-bit systems.
+  - Example: ls -l /lib64 | head
+
+- /media
+  - Mount points for removable media (USB CDs) created automatically (GUI systems).
+  - Example: ls -la /media
+
+- /mnt
+  - Temporary mount point for administrators (manual mounts).
+  - Example: sudo mount /dev/sdb1 /mnt; ls /mnt
+
+- /opt
+  - Optional add-on application packages (third-party software).
+  - Example: ls -l /opt
+
+- /proc
+  - Virtual filesystem providing process and kernel information (procfs).
+  - Example: cat /proc/cpuinfo
+
+- /root
+  - Home directory for the root user (not the same as /).
+  - Example: ls -la /root
+
+- /run
+  - Runtime data since boot (sockets, pids); volatile.
+  - Example: ls -la /run
+
+- /sbin
+  - System binaries for administration (fdisk, ifconfig) — usually run by root.
+  - Example: ls -l /sbin
+
+- /srv
+  - Data for services provided by the system (WWW, FTP data).
+  - Example: ls -la /srv
+
+- /sys
+  - Virtual filesystem exposing kernel objects and device tree (sysfs).
+  - Example: ls -la /sys/class/net
+
+- /tmp
+  - Temporary files — world-writable, often cleared at reboot.
+  - Example: ls -la /tmp
+
+- /var
+  - Variable data: logs (/var/log), mail, spool files, package caches.
+  - Example: ls -la /var/log
 
 ---
+
+## The Significance of the Linux File System Hierarchy
+
+- Predictability: standard locations make it easy to find binaries, configs, and logs.
+- Separation of concerns: isolates user data, system files, runtime data, and optional software.
+- Permissions & security: directories have differing default permissions and purposes.
+- Maintainability: backups, package management, and recovery are simpler with a consistent layout.
+
+---
+
+## Inside the Linux Root Directory: What You Need to Know
+
+- Root (/) contains mount points and top-level directories — do not store user files directly in /.
+- Mounted filesystems (external disks, network mounts) appear at mount points (e.g., /mnt, /media).
+- Virtual filesystems (/proc, /sys, /run) are kernel-provided views — read-only or volatile.
+- Lost+found: usually present on filesystems formatted with ext{2,3,4}; stores recovered file fragments after fsck.
+- Use ls -ld and stat to inspect ownership, perms, and mount points:
+  - stat /
+
+---
+
+## Understanding the Functionality of Common Linux Directories (quick guide)
+
+- Binaries: /bin, /sbin, /usr/bin, /usr/sbin
+  - User vs system admin tools; /usr/* holds larger collections installed by packages.
+- Libraries: /lib, /lib64, /usr/lib
+  - Shared code used by binaries.
+- Configuration: /etc
+  - Centralized system configuration; backup before editing.
+- User data: /home, /root
+  - Personal files and settings per user.
+- Variable & logs: /var (logs, spools, caches)
+  - Monitor /var/log for troubleshooting.
+- Boot & kernel: /boot
+  - Kernel images and bootloader files.
+- Devices & runtime: /dev, /proc, /sys, /run
+  - Device nodes, process info, kernel object interfaces, and runtime state.
+- Optional & service data: /opt, /srv
+  - Third-party apps and service-specific content.
+- Temporary: /tmp
+  - Short-lived files; safe to clean periodically.
+
+---
+
+## Introduction to Linux Shortcuts: Boost Your Efficiency
+
+- ~ (tilde)
+  - Shortcut for current user's home directory.
+  - Example: cd ~ or cd ~/projects
+
+- / (root)
+  - Absolute path starts at root: cd /etc
+
+- . (dot)
+  - Current directory. Useful in commands: ./script.sh
+
+- .. (double dot)
+  - Parent directory. Example: cd ..
+
+- - (dash)
+  - Previous directory. Example: cd -  (switch back)
+
+- Tab completion
+  - Press Tab to auto-complete commands, filenames, and paths.
+
+- Ctrl+R (reverse search)
+  - Interactive history search to find previous commands.
+
+- Ctrl+C and Ctrl+Z
+  - Ctrl+C: kill running foreground process.
+  - Ctrl+Z: suspend process (use bg/fg to resume).
+
+- pushd / popd / dirs
+  - Directory stack for quick navigation.
+  - Example: pushd /var/log; popd
+
+- Aliases
+  - Short commands: alias ll='ls -lah'
+  - Add to ~/.bashrc to persist.
+
+- Symbolic links
+  - Create shortcuts inside filesystem: ln -s /path/to/target ~/shortcut
+
+---
+
+## Hands-on Exercises (short)
+
+1. List top-level directories and permissions:
+   - ls -la /
+2. Check mount points and disks:
+   - lsblk; mount | grep '^/dev'
+3. Inspect kernel and process info:
+   - cat /proc/cpuinfo | head
+4. Use shortcuts:
+   - cd ~; mkdir -p ~/lab; pushd /var/log; popd; cd -
+5. Create an alias and persist it:
+   - echo "alias ll='ls -lah'" >> ~/.bashrc; source ~/.bashrc
+
+---
+
+## Quick Reference (commands)
+
+- Inspect directories:
+  - ls -la /path
+  - stat /path
+- Disk & mounts:
+  - lsblk
+  - df -h
+  - mount
+- Virtual fs:
+  - ls /proc
+  - ls /sys
+- Links:
+  - ln -s /target /link
+- Shortcuts:
+  - cd ~, cd -, cd .., Tab, Ctrl+R
+
+---
+
+
+
